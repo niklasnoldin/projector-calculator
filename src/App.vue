@@ -8,13 +8,22 @@
 	import gsap from "gsap";
 	import { formatNumber, round } from "@/helpers";
 
-	import { useWindowSize } from "@vueuse/core";
+	import {
+		breakpointsTailwind,
+		useBreakpoints,
+		useWindowSize,
+	} from "@vueuse/core";
 	const { width, height } = useWindowSize();
-	const windowAspectRatio = computed(
-		() => (width.value - 80) / (height.value - 80 - 56)
+	const { md } = useBreakpoints(breakpointsTailwind);
+	const windowAspectRatio = computed(() =>
+		md.value
+			? (width.value - 80) / (height.value - 80 - 56)
+			: (width.value - 80) / (height.value - 80 - 49)
 	);
-	const graphicAspectRatio = computed(
-		() => (projector.depth + renderData.distance) / renderData.totalWallSpace
+	const graphicAspectRatio = computed(() =>
+		md.value
+			? (projector.depth + renderData.distance) / renderData.totalWallSpace
+			: renderData.imageWidth / (projector.depth + renderData.distance)
 	);
 	gsap.defaults({
 		ease: "power3.inOut",
@@ -108,14 +117,23 @@
 		}
 	);
 	function cm2css(cm: number): string {
-		if (graphicAspectRatio.value > windowAspectRatio.value)
+		if (md.value)
+			if (graphicAspectRatio.value > windowAspectRatio.value)
+				return `calc(${
+					cm / (projector.depth + renderData.distance)
+				} * (100vw - var(--main-padding) * 2))`;
+			else
+				return `calc(${
+					cm / renderData.totalWallSpace
+				} * (100vh - var(--main-padding) * 2 - 56px))`;
+		else if (graphicAspectRatio.value < windowAspectRatio.value)
 			return `calc(${
 				cm / (projector.depth + renderData.distance)
-			} * (100vw - var(--main-padding) * 2))`;
+			} * (100vh - var(--main-padding) * 2 - 49px))`;
 		else
 			return `calc(${
-				cm / renderData.totalWallSpace
-			} * (100vh - var(--main-padding) * 2 - 56px))`;
+				cm / renderData.imageWidth
+			} * (100vw - var(--main-padding) * 2))`;
 	}
 	function updateValues() {
 		updatingFromWithin.value = true;
@@ -160,14 +178,13 @@
 				'--screen-width': cm2css(renderData.imageWidth * 0.33),
 			}">
 			<div
-				class="absolute bottom-screenWidth mb-xl inset-x-xl flex flex-col items-center"
+				class="absolute bottom-xl mb-screenWidth pb-12 inset-x-xl flex flex-col items-center"
 				:style="{
 					height: `calc(${cm2css(renderData.distance)} - var(--screen-width))`,
 				}">
 				<div class="flex justify-center items-center grow">
 					<Input label="distance" v-model="inputs.distance" />
 				</div>
-
 				<div
 					class="flex text-center leading-none flex-col-reverse w-screenWidth">
 					<p class="smolfat">offset</p>
@@ -237,6 +254,13 @@
 					:style="{ opacity: 0.5 + (inputs.lux / 4000) * 0.5 }">
 					<path d="M0 0V10H10Z" />
 				</svg>
+			</div>
+			<div class="flex pt-2 h-12 w-full">
+				<Input label="height" v-model="inputs.height" />
+				<div class="grow flex justify-center">
+					<Input label="width" v-model="inputs.width" />
+				</div>
+				<Input label="diagonal" v-model="inputs.diagonal" />
 			</div>
 		</div>
 		<div
