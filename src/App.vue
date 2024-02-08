@@ -1,163 +1,3 @@
-<script setup lang="ts">
-	import { computed, reactive, ref, watch } from "vue";
-	import ProjectorIcon from "@/components/ProjectorIcon.vue";
-	import ProjectorIconBirdsEye from "@/components/ProjectorIconBirdsEye.vue";
-	import { type Projector } from "@/types";
-	import ProjectorDetails from "@/components/ProjectorDetails.vue";
-	import Input from "@/components/Input.vue";
-	import gsap from "gsap";
-	import { formatNumber, round } from "@/helpers";
-
-	import {
-		breakpointsTailwind,
-		useBreakpoints,
-		useWindowSize,
-	} from "@vueuse/core";
-	const { width, height } = useWindowSize();
-	const { md } = useBreakpoints(breakpointsTailwind);
-	const windowAspectRatio = computed(() =>
-		md.value
-			? (width.value - 80) / (height.value - 80 - 56)
-			: (width.value - 80) / (height.value - 80 - 49)
-	);
-	const graphicAspectRatio = computed(() =>
-		md.value
-			? (projector.depth + renderData.distance) / renderData.totalWallSpace
-			: renderData.imageWidth / (projector.depth + renderData.distance)
-	);
-	gsap.defaults({
-		ease: "power3.inOut",
-		duration: 0.5,
-	});
-	const projector = reactive<Projector>({
-		depth: 25,
-		lensOffset: 5,
-		maxZoom: 1.1,
-		lensHeight: 3,
-		throwRatio: 1,
-		aspectRatio: 16 / 9,
-		offset: 0.16,
-		lumen: 3500,
-	});
-	const distance = ref(100);
-	const image = computed(() => {
-		const width = distance.value / projector.throwRatio;
-		const height = width / projector.aspectRatio;
-		const offset = height * projector.offset;
-		const diagonal = Math.sqrt(width ** 2 + height ** 2);
-		const area = (width * height) / (100 * 100); // sqcm 2 sqm
-		return { width, height, offset, diagonal, area };
-	});
-
-	const totalWallSpace = computed(
-		() => projector.lensOffset + image.value.offset + image.value.height
-	);
-
-	const inputs = reactive({
-		distance: distance.value,
-		width: image.value.width,
-		height: image.value.height,
-		diagonal: image.value.diagonal,
-		offset: image.value.offset,
-		lux: projector.lumen / image.value.area,
-	});
-
-	const renderData = reactive({
-		totalWallSpace: totalWallSpace.value,
-		distance: distance.value,
-		imageHeight: image.value.height,
-		imageOffset: image.value.offset,
-		imageWidth: image.value.width,
-	});
-
-	const updatingFromWithin = ref(false);
-
-	watch(
-		() => projector.throwRatio,
-		() => {
-			if (updatingFromWithin.value) return;
-			updateValues();
-		}
-	);
-
-	watch(
-		() => inputs.distance,
-		() => {
-			if (updatingFromWithin.value) return;
-			distance.value = parseFloat(inputs.distance.toString());
-			updateValues();
-		}
-	);
-	watch(
-		() => inputs.width,
-		() => {
-			if (updatingFromWithin.value) return;
-			distance.value = inputs.width * projector.throwRatio;
-			updateValues();
-		}
-	);
-	watch(
-		() => inputs.height,
-		() => {
-			if (updatingFromWithin.value) return;
-			distance.value =
-				inputs.height * projector.aspectRatio * projector.throwRatio;
-			updateValues();
-		}
-	);
-	watch(
-		() => inputs.diagonal,
-		() => {
-			if (updatingFromWithin.value) return;
-			const width =
-				(inputs.diagonal * projector.aspectRatio) /
-				Math.sqrt(projector.aspectRatio ** 2 + 1);
-			distance.value = width * projector.throwRatio;
-			updateValues();
-		}
-	);
-	function cm2css(cm: number): string {
-		if (md.value)
-			if (graphicAspectRatio.value > windowAspectRatio.value)
-				return `calc(${
-					cm / (projector.depth + renderData.distance)
-				} * (100vw - var(--main-padding) * 2))`;
-			else
-				return `calc(${
-					cm / renderData.totalWallSpace
-				} * (100vh - var(--main-padding) * 2 - 56px))`;
-		else if (graphicAspectRatio.value < windowAspectRatio.value)
-			return `calc(${
-				cm / (projector.depth + renderData.distance)
-			} * (100vh - var(--main-padding) * 2 - 49px))`;
-		else
-			return `calc(${
-				cm / renderData.imageWidth
-			} * (100vw - var(--main-padding) * 2))`;
-	}
-	function updateValues() {
-		updatingFromWithin.value = true;
-		gsap.to(inputs, {
-			offset: image.value.offset,
-			lux: projector.lumen / image.value.area,
-			distance: distance.value,
-			diagonal: image.value.diagonal,
-			width: image.value.width,
-			height: image.value.height,
-			onComplete() {
-				updatingFromWithin.value = false;
-			},
-		});
-		gsap.to(renderData, {
-			totalWallSpace: totalWallSpace.value,
-			distance: distance.value,
-			imageHeight: image.value.height,
-			imageWidth: image.value.width,
-			imageOffset: image.value.offset,
-		});
-	}
-</script>
-
 <template>
 	<h1 class="sr-only">Projector Calculator</h1>
 	<main class="h-screen">
@@ -218,8 +58,8 @@
 				<path
 					:d="`M0 100H${100 * (renderData.imageWidth / renderData.distance)}L${
 						50 * (renderData.imageWidth / renderData.distance) +
-						projector.lensHeight / 2
-					} 0h${-projector.lensHeight}Z`"
+						projector.lensDiameter / 2
+					} 0h${-projector.lensDiameter}Z`"
 					fill="url('#gradient')" />
 			</svg>
 			<div class="flex justify-center h-screenWidth">
@@ -268,7 +108,7 @@
 			:style="{
 				'--screen-width': cm2css(renderData.imageHeight * 0.33),
 			}">
-			<div class="absolute mb-0 bottom-xl inset-x-xl flex justify-end">
+			<div class="absolute bottom-xl inset-x-xl flex justify-end">
 				<div
 					class="flex justify-center items-center"
 					:style="{
@@ -277,7 +117,8 @@
 					<Input label="distance" v-model="inputs.distance" />
 				</div>
 				<div
-					class="flex text-center leading-none flex-col-reverse w-screenWidth">
+					class="flex text-center leading-none flex-col-reverse w-screenWidth input-shadow"
+					:class="inputs.offset < 0 && 'invisible'">
 					<p class="smolfat">offset</p>
 					<p class="big mb-1 pb-px">{{ formatNumber(inputs.offset) }} cm</p>
 				</div>
@@ -287,16 +128,25 @@
 					width: cm2css(projector.depth),
 				}">
 				<ProjectorIcon class="h-auto w-full" />
+				<div
+					v-show="inputs.offset < 0"
+					:style="{
+						height: cm2css(projectorOffset),
+					}"
+					class="flex text-center justify-center leading-none flex-col-reverse w-full input-shadow">
+					<p class="smolfat">offset</p>
+					<p class="big mb-1 pb-px">{{ formatNumber(inputs.offset) }} cm</p>
+				</div>
 			</div>
 			<svg
 				width="100"
-				:height="100 * (renderData.totalWallSpace / renderData.distance)"
+				:height="100 * (renderData.totalGraphicHeight / renderData.distance)"
 				:viewBox="`0 0 100 ${
-					100 * (renderData.totalWallSpace / renderData.distance)
+					100 * (renderData.totalGraphicHeight / renderData.distance)
 				}`"
-				class="fill-current w-full flicker relative -z-10 pointer-events-none"
+				class="fill-current w-full flicker relative pointer-events-none"
 				:style="{
-					height: cm2css(renderData.totalWallSpace),
+					height: cm2css(renderData.totalGraphicHeight),
 					width: cm2css(renderData.distance),
 					marginRight: `calc(-1 * var(--screen-width) - 12rem)`,
 				}"
@@ -304,34 +154,15 @@
 				<defs>
 					<linearGradient id="gradient-horizontal">
 						<stop offset="0%" stop-color="currentColor" />
-						<stop offset="100%" stop-color="transparent" />
+						<stop offset="100%" stop-color="#fff0" />
 					</linearGradient>
 				</defs>
-				<path
-					:d="`M0 ${
-						100 *
-						(renderData.totalWallSpace / renderData.distance) *
-						(1 -
-							(projector.lensOffset + projector.lensHeight / 2) /
-								renderData.totalWallSpace)
-					}L0 ${
-						100 *
-						(renderData.totalWallSpace / renderData.distance) *
-						(1 -
-							(projector.lensOffset - projector.lensHeight / 2) /
-								renderData.totalWallSpace)
-					} L100 ${
-						100 *
-						(renderData.totalWallSpace / renderData.distance) *
-						(renderData.imageHeight / renderData.totalWallSpace)
-					}L100 0Z`"
-					fill="url('#gradient-horizontal')" />
+				<path :d="shinePath" fill="url('#gradient-horizontal')" />
 			</svg>
-
 			<div
 				class="w-48 pr-4 flex flex-col items-end"
 				:style="{
-					paddingBottom: cm2css(renderData.imageOffset + projector.lensOffset),
+					paddingBottom: cm2css(renderData.bottomOffset),
 				}">
 				<div
 					:style="{
@@ -346,9 +177,7 @@
 				<div
 					class="w-screenWidth overflow-visible"
 					:style="{
-						paddingBottom: cm2css(
-							renderData.imageOffset + projector.lensOffset
-						),
+						paddingBottom: cm2css(renderData.bottomOffset),
 					}">
 					<div class="flex justify-center">
 						<Input label="width" v-model="inputs.width" />
@@ -358,7 +187,7 @@
 						height="10"
 						viewBox="0 0 10 10"
 						preserveAspectRatio="none"
-						class="fill-current w-full h-16"
+						class="fill-current w-full h-12"
 						xmlns="http://www.w3.org/2000/svg"
 						:style="{ opacity: 0.5 + (inputs.lux / 4000) * 0.5 }">
 						<path d="M0 10H10V0Z" />
@@ -379,7 +208,7 @@
 						height="10"
 						viewBox="0 0 10 10"
 						preserveAspectRatio="none"
-						class="fill-current w-full h-8"
+						class="fill-current w-full h-12"
 						xmlns="http://www.w3.org/2000/svg"
 						:style="{ opacity: 0.5 + (inputs.lux / 4000) * 0.5 }">
 						<path d="M0 0H10V10Z" />
@@ -389,10 +218,214 @@
 		</div>
 	</main>
 </template>
+<script setup lang="ts">
+	import { computed, reactive, ref, watch } from "vue";
+	import ProjectorIcon from "@/components/ProjectorIcon.vue";
+	import ProjectorIconBirdsEye from "@/components/ProjectorIconBirdsEye.vue";
+	import { type Projector } from "@/types";
+	import ProjectorDetails from "@/components/ProjectorDetails.vue";
+	import Input from "@/components/Input.vue";
+	import gsap from "gsap";
+	import { formatNumber, round } from "@/helpers";
+
+	import {
+		breakpointsTailwind,
+		useBreakpoints,
+		useWindowSize,
+	} from "@vueuse/core";
+	const { width, height } = useWindowSize();
+	const { md } = useBreakpoints(breakpointsTailwind);
+	const windowAspectRatio = computed(() =>
+		md.value
+			? (width.value - 80) / (height.value - 80 - 56)
+			: (width.value - 80) / (height.value - 80 - 49)
+	);
+	const graphicAspectRatio = computed(() =>
+		md.value
+			? (projector.depth + renderData.distance) / renderData.totalGraphicHeight
+			: renderData.imageWidth / (projector.depth + renderData.distance)
+	);
+	gsap.defaults({
+		ease: "power3.inOut",
+		duration: 0.5,
+	});
+	const projector = reactive<Projector>({
+		depth: 25,
+		lensOffset: 5,
+		maxZoom: 1.1,
+		lensDiameter: 3,
+		throwRatio: 1,
+		aspectRatio: 16 / 9,
+		offset: 0,
+		lumen: 3500,
+	});
+	const distance = ref(100);
+	const image = computed(() => {
+		const width = distance.value / projector.throwRatio;
+		const height = width / projector.aspectRatio;
+		const offset = height * projector.offset;
+		const diagonal = Math.sqrt(width ** 2 + height ** 2);
+		const area = (width * height) / (100 * 100); // sqcm 2 sqm
+		return { width, height, offset, diagonal, area };
+	});
+
+	const totalGraphicHeight = computed(() => {
+		if (image.value.offset < 0)
+			if (-image.value.offset > projector.lensOffset)
+				return Math.max(
+					-image.value.offset + projector.lensOffset + projector.lensDiameter,
+					image.value.height
+				);
+			else
+				return image.value.height + projector.lensOffset + image.value.offset;
+		else return projector.lensOffset + image.value.offset + image.value.height;
+	});
+
+	const bottomOffset = computed(() => {
+		if (image.value.offset < 0) return 0;
+		return image.value.offset + projector.lensOffset;
+	});
+	const projectorOffset = computed(() => {
+		if (renderData.imageOffset < 0)
+			return -renderData.imageOffset - projector.lensOffset;
+		else return 0;
+	});
+
+	const shinePath = computed(() => {
+		const totalHeightInSvgSpace =
+			100 * (renderData.totalGraphicHeight / renderData.distance);
+		const lensCenter =
+			renderData.totalGraphicHeight -
+			((renderData.imageOffset < 0 ? 0 : projector.lensOffset) +
+				Math.max(-renderData.imageOffset, 0));
+		const lensUpper = lensCenter - projector.lensDiameter / 2;
+		const lensLower = lensCenter + projector.lensDiameter / 2;
+		const relativeLensUpper = lensUpper / renderData.totalGraphicHeight;
+		const relativeLensLower = lensLower / renderData.totalGraphicHeight;
+
+		const topOffsetRight =
+			(renderData.imageOffset < 0
+				? Math.max(0, renderData.totalGraphicHeight - renderData.imageHeight)
+				: 0) / renderData.totalGraphicHeight;
+
+		return `M0 ${totalHeightInSvgSpace * relativeLensUpper}L0 ${
+			totalHeightInSvgSpace * relativeLensLower
+		}L100 ${
+			totalHeightInSvgSpace *
+			(topOffsetRight + renderData.imageHeight / renderData.totalGraphicHeight)
+		}L100 ${totalHeightInSvgSpace * topOffsetRight}Z`;
+	});
+
+	const inputs = reactive({
+		distance: distance.value,
+		width: image.value.width,
+		height: image.value.height,
+		diagonal: image.value.diagonal,
+		offset: image.value.offset,
+		lux: projector.lumen / image.value.area,
+	});
+
+	const renderData = reactive({
+		totalGraphicHeight: totalGraphicHeight.value,
+		distance: distance.value,
+		imageHeight: image.value.height,
+		imageOffset: image.value.offset,
+		imageWidth: image.value.width,
+		bottomOffset: bottomOffset.value,
+	});
+
+	const updatingFromWithin = ref(false);
+
+	watch(
+		() => projector.throwRatio,
+		() => {
+			if (updatingFromWithin.value) return;
+			updateValues();
+		}
+	);
+
+	watch(
+		() => inputs.distance,
+		() => {
+			if (updatingFromWithin.value) return;
+			distance.value = Math.max(50, parseFloat(inputs.distance.toString()));
+			updateValues();
+		}
+	);
+	watch(
+		() => inputs.width,
+		() => {
+			if (updatingFromWithin.value) return;
+			distance.value = inputs.width * projector.throwRatio;
+			updateValues();
+		}
+	);
+	watch(
+		() => inputs.height,
+		() => {
+			if (updatingFromWithin.value) return;
+			distance.value =
+				inputs.height * projector.aspectRatio * projector.throwRatio;
+			updateValues();
+		}
+	);
+	watch(
+		() => inputs.diagonal,
+		() => {
+			if (updatingFromWithin.value) return;
+			const width =
+				(inputs.diagonal * projector.aspectRatio) /
+				Math.sqrt(projector.aspectRatio ** 2 + 1);
+			distance.value = width * projector.throwRatio;
+			updateValues();
+		}
+	);
+	function cm2css(cm: number): string {
+		if (md.value)
+			if (graphicAspectRatio.value > windowAspectRatio.value)
+				return `calc(${
+					cm / (projector.depth + renderData.distance)
+				} * (100vw - var(--main-padding) * 2))`;
+			else
+				return `calc(${
+					cm / renderData.totalGraphicHeight
+				} * (100vh - var(--main-padding) * 2 - 56px))`;
+		else if (graphicAspectRatio.value < windowAspectRatio.value)
+			return `calc(${
+				cm / (projector.depth + renderData.distance)
+			} * (100vh - var(--main-padding) * 2 - 49px))`;
+		else
+			return `calc(${
+				cm / renderData.imageWidth
+			} * (100vw - var(--main-padding) * 2))`;
+	}
+	function updateValues() {
+		updatingFromWithin.value = true;
+		gsap.to(inputs, {
+			offset: image.value.offset,
+			lux: projector.lumen / image.value.area,
+			distance: distance.value,
+			diagonal: image.value.diagonal,
+			width: image.value.width,
+			height: image.value.height,
+			onComplete() {
+				updatingFromWithin.value = false;
+			},
+		});
+		gsap.to(renderData, {
+			totalGraphicHeight: totalGraphicHeight.value,
+			distance: distance.value,
+			imageHeight: image.value.height,
+			imageWidth: image.value.width,
+			imageOffset: image.value.offset,
+			bottomOffset: bottomOffset.value,
+		});
+	}
+</script>
 
 <style scoped>
 	.flicker {
-		animation: flicker 0.1s steps(3) infinite;
+		/* animation: flicker 0.1s steps(3) infinite; */
 	}
 	@keyframes flicker {
 		from {

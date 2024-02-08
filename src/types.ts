@@ -1,7 +1,7 @@
 interface Projector {
   depth: number;
   lensOffset: number;
-  lensHeight: number;
+  lensDiameter: number;
   throwRatio: number;
   aspectRatio: number;
   offset: number;
