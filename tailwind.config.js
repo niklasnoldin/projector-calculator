@@ -9,8 +9,10 @@ export default {
 				xl: "var(--spacing-xl)",
 			},
 			colors: {
-				dark: { DEFAULT: "#282834" },
-				light: { DEFAULT: "#faffe7" },
+				dark: { DEFAULT: "var(--dark)" },
+				light: { DEFAULT: "var(--light)" },
+				screen: { DEFAULT: "var(--screen)" },
+				highlight: { DEFAULT: "var(--highlight)" },
 			},
 		},
 	},

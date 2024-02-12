@@ -3,18 +3,28 @@
 @tailwind utilities;
 
 html {
-	--dark: #282834;
-	--light: #faffe7;
+	--dark: hsl(240, 49%, 38%);
+	/* --light: #eff5fd; */
+	--light: hsl(179, 100%, 88%);
+	--screen: var(--light);
+	--highlight: hsl(179, 100%, 88%);
 	--spacing-xl: 2rem;
 	--screen-width: 8rem;
 	font-size: 16px;
-	background: var(--dark);
-	background-image: linear-gradient(to bottom, #24242f, var(--dark));
+	background-color: var(--dark);
+	background-size: 6px 6px, 100% 100%;
+	background-image: radial-gradient(
+			circle at center,
+			#0003 2.4px,
+			transparent 2.5px
+		),
+		linear-gradient(to bottom right, hsl(240, 80%, 75%), var(--dark));
 	color: var(--light);
 	font-family: "Source Serif Pro", sans-serif;
 	font-weight: 400;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+	/* filter: url(#noiseFilter); */
 }
 
 .smolfat {

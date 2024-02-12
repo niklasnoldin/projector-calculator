@@ -1,16 +1,109 @@
 <template>
 	<h1 class="sr-only">Projector Calculator</h1>
 	<main class="h-screen">
-		<div class="absolute top-xl left-xl">
-			<div class="flex flex-col">
-				<label for="projector-select" class="smolfat">Projector</label>
-				<select
-					id="projector-select"
-					class="big bg-transparent border-none text-inherit focus:underline focus:outline-none decoration-1 underline-offset-2">
-					<option value="optoma-hd28e" selected>Optoma HD28e</option>
-				</select>
+		<div class="absolute z-10 top-xl left-xl right-xl sm:right-auto sm:w-auto">
+			<div
+				class="backdrop-blur text-highlight shadow-xl backdrop-brightness-50 px-xl py-6 rounded-2xl">
+				<h2 class="big mb-4 leading-none text-highlight">Projector</h2>
+
+				<label for="throw-ratio" class="flex justify-between items-center">
+					<span class="">Throw Ratio</span>
+					<div
+						class="big border-b focus-within:border-current mb-1 self-scaling"
+						:data-value="projector.throwRatio">
+						<input
+							class="bg-transparent text-center focus:outline-none"
+							type="string"
+							size="1"
+							id="throw-ratio"
+							v-model="projector.throwRatio" />
+					</div>
+				</label>
+				<label for="brightness" class="flex justify-between items-center">
+					<span class="">Brightness</span>
+					<div
+						class="big border-b focus-within:border-current mb-1 self-scaling"
+						:data-value="projector.lumen">
+						<input
+							class="bg-transparent text-center focus:outline-none"
+							type="string"
+							size="1"
+							id="brightness"
+							v-model="projector.lumen" />
+						<p class="ml-1.5 leading-none">Lumen</p>
+					</div>
+				</label>
+				<label for="offset" class="flex justify-between items-center">
+					<span class="">Offset</span>
+					<div
+						class="big border-b focus-within:border-current mb-1 self-scaling"
+						:data-value="projector.offset">
+						<input
+							class="bg-transparent text-center focus:outline-none"
+							type="string"
+							size="1"
+							id="offset"
+							v-model="projector.offset" />
+					</div>
+				</label>
+				<label for="aspectRatio-1" class="flex justify-between items-center">
+					<span class="">Aspect Ratio</span>
+					<div
+						class="big border-b focus-within:border-current mb-1 self-scaling"
+						:data-value="projector.aspectRatio[0]"
+						:data-value2="projector.aspectRatio[1]">
+						<input
+							class="bg-transparent text-center focus:outline-none"
+							type="string"
+							size="1"
+							id="aspectRatio-1"
+							v-model="projector.aspectRatio[0]" />
+						<p class="leading-none">:</p>
+						<input
+							class="bg-transparent text-center focus:outline-none"
+							type="string"
+							size="1"
+							id="aspectRatio-2"
+							v-model="projector.aspectRatio[1]" />
+					</div>
+				</label>
 			</div>
-			<ProjectorDetails :projector="projector" />
+			<div class="mt-2 sm:mt-4 flex">
+				<button
+					class="px-8 py-4 grow border border-highlight font-sans font-bold whitespace-nowrap rounded-2xl text-dark bg-highlight relative"
+					@click="flipped = !flipped">
+					<span
+						:class="flipped && 'opacity-0'"
+						class="flex justify-center transition-opacity"
+						>mount to ceiling</span
+					>
+					<span
+						:class="flipped || 'opacity-0'"
+						class="absolute inset-0 h-full items-center flex justify-center transition-opacity"
+						>put on feet</span
+					>
+				</button>
+				<button
+					@click="imperial = false"
+					class="ml-3 sm:ml-5 inline-block transition-colors border border-highlight px-8 py-4 font-sans font-bold whitespace-nowrap rounded-l-2xl relative shadow-xl"
+					:class="
+						imperial
+							? ' backdrop-blur text-highlight'
+							: 'bg-highlight text-dark '
+					">
+					cm
+				</button>
+				<button
+					@click="imperial = true"
+					class="inline-block transition-colors px-8 py-4 border border-highlight font-sans font-bold whitespace-nowrap rounded-r-2xl relative shadow-xl"
+					:class="
+						!imperial
+							? ' backdrop-blur text-highlight'
+							: 'bg-highlight text-dark '
+					">
+					in
+				</button>
+			</div>
 		</div>
 		<div
 			class="md:hidden flex items-center justify-end h-full flex-col"
@@ -28,7 +121,9 @@
 				<div
 					class="flex text-center leading-none flex-col-reverse w-screenWidth">
 					<p class="smolfat">offset</p>
-					<p class="big mb-1 pb-px">{{ formatNumber(inputs.offset) }} cm</p>
+					<p class="big mb-1 pb-px">
+						{{ formatNumber(inputs.offset) }} {{ imperial ? "in" : "cm" }}
+					</p>
 				</div>
 			</div>
 			<ProjectorIconBirdsEye
@@ -68,13 +163,13 @@
 					height="10"
 					viewBox="0 0 10 10"
 					preserveAspectRatio="none"
-					class="fill-current w-12 h-full"
+					class="fill-screen w-12 h-full"
 					xmlns="http://www.w3.org/2000/svg"
 					:style="{ opacity: 0.5 + (inputs.lux / 4000) * 0.5 }">
 					<path d="M0 10H10V0Z" />
 				</svg>
 				<div
-					class="w-full bg-light flex flex-col leading-none items-center justify-center text-dark text-center"
+					class="w-full bg-screen flex flex-col leading-none items-center justify-center text-dark text-center"
 					:style="{
 						width: `calc(${cm2css(renderData.imageWidth)} - 6rem)`,
 						opacity: 0.5 + (inputs.lux / 4000) * 0.5,
@@ -89,7 +184,7 @@
 					height="10"
 					viewBox="0 0 10 10"
 					preserveAspectRatio="none"
-					class="fill-current w-12 h-full"
+					class="fill-screen w-12 h-full"
 					xmlns="http://www.w3.org/2000/svg"
 					:style="{ opacity: 0.5 + (inputs.lux / 4000) * 0.5 }">
 					<path d="M0 0V10H10Z" />
@@ -116,26 +211,46 @@
 					}">
 					<Input label="distance" v-model="inputs.distance" />
 				</div>
-				<div
-					class="flex text-center leading-none flex-col-reverse w-screenWidth input-shadow"
-					:class="inputs.offset < 0 && 'invisible'">
-					<p class="smolfat">offset</p>
-					<p class="big mb-1 pb-px">{{ formatNumber(inputs.offset) }} cm</p>
+				<div class="w-screenWidth">
+					<Transition name="fade">
+						<div
+							v-if="image.offset >= 0"
+							class="flex text-center leading-none flex-col-reverse w-full input-shadow">
+							<p class="smolfat">offset</p>
+							<p class="big mb-1 pb-px">
+								{{ formatNumber(inputs.offset) }} {{ imperial ? "in" : "cm" }}
+							</p>
+						</div>
+					</Transition>
 				</div>
 			</div>
 			<div
 				:style="{
 					width: cm2css(projector.depth),
-				}">
-				<ProjectorIcon class="h-auto w-full" />
+				}"
+				class="text-highlight">
+				<Transition name="fade-quick" mode="out-in">
+					<ProjectorIcon
+						v-if="flipped"
+						class="h-auto w-full -scale-y-100"
+						key="flipped" />
+					<ProjectorIcon v-else class="h-auto w-full" key="bottom" />
+				</Transition>
 				<div
-					v-show="inputs.offset < 0"
 					:style="{
 						height: cm2css(projectorOffset),
 					}"
-					class="flex text-center justify-center leading-none flex-col-reverse w-full input-shadow">
-					<p class="smolfat">offset</p>
-					<p class="big mb-1 pb-px">{{ formatNumber(inputs.offset) }} cm</p>
+					class="flex items-center justify-center">
+					<Transition name="fade">
+						<div
+							v-if="image.offset < 0"
+							class="flex min-w-max flex-col-reverse leading-none text-center input-shadow">
+							<p class="smolfat">offset</p>
+							<p class="big mb-1 pb-px">
+								{{ formatNumber(inputs.offset) }} {{ imperial ? "in" : "cm" }}
+							</p>
+						</div>
+					</Transition>
 				</div>
 			</div>
 			<svg
@@ -154,7 +269,7 @@
 				<defs>
 					<linearGradient id="gradient-horizontal">
 						<stop offset="0%" stop-color="currentColor" />
-						<stop offset="100%" stop-color="#fff0" />
+						<stop offset="100%" stop-color="#e7f2ff00" />
 					</linearGradient>
 				</defs>
 				<path :d="shinePath" fill="url('#gradient-horizontal')" />
@@ -187,13 +302,13 @@
 						height="10"
 						viewBox="0 0 10 10"
 						preserveAspectRatio="none"
-						class="fill-current w-full h-12"
+						class="fill-screen w-full h-12"
 						xmlns="http://www.w3.org/2000/svg"
 						:style="{ opacity: 0.5 + (inputs.lux / 4000) * 0.5 }">
 						<path d="M0 10H10V0Z" />
 					</svg>
 					<div
-						class="w-full bg-light flex flex-col leading-none items-center justify-center text-dark text-center"
+						class="w-full bg-screen flex flex-col leading-none items-center justify-center text-dark text-center"
 						:style="{
 							height: `calc(${cm2css(renderData.imageHeight)} - 6rem)`,
 							opacity: 0.5 + (inputs.lux / 4000) * 0.5,
@@ -201,14 +316,14 @@
 						<p class="big">
 							{{ formatNumber(round(inputs.lux, 0)) }}
 						</p>
-						<p class="smolfat">lux</p>
+						<p class="smolfat mb-1 pb-px">lux</p>
 					</div>
 					<svg
 						width="10"
 						height="10"
 						viewBox="0 0 10 10"
 						preserveAspectRatio="none"
-						class="fill-current w-full h-12"
+						class="fill-screen w-full h-12"
 						xmlns="http://www.w3.org/2000/svg"
 						:style="{ opacity: 0.5 + (inputs.lux / 4000) * 0.5 }">
 						<path d="M0 0H10V10Z" />
@@ -219,11 +334,10 @@
 	</main>
 </template>
 <script setup lang="ts">
-	import { computed, reactive, ref, watch } from "vue";
+	import { computed, provide, reactive, readonly, ref, watch } from "vue";
 	import ProjectorIcon from "@/components/ProjectorIcon.vue";
 	import ProjectorIconBirdsEye from "@/components/ProjectorIconBirdsEye.vue";
 	import { type Projector } from "@/types";
-	import ProjectorDetails from "@/components/ProjectorDetails.vue";
 	import Input from "@/components/Input.vue";
 	import gsap from "gsap";
 	import { formatNumber, round } from "@/helpers";
@@ -249,21 +363,29 @@
 		ease: "power3.inOut",
 		duration: 0.5,
 	});
+
 	const projector = reactive<Projector>({
 		depth: 25,
 		lensOffset: 5,
 		maxZoom: 1.1,
 		lensDiameter: 3,
-		throwRatio: 1,
-		aspectRatio: 16 / 9,
-		offset: 0,
+		throwRatio: 1.5,
+		aspectRatio: [16, 9],
+		offset: 0.66,
 		lumen: 3500,
 	});
 	const distance = ref(100);
+	const flipped = ref(false);
+	const imperial = ref(false);
+
+	provide("imperial", readonly(imperial));
+
 	const image = computed(() => {
 		const width = distance.value / projector.throwRatio;
-		const height = width / projector.aspectRatio;
-		const offset = height * projector.offset;
+		const height =
+			width / (projector.aspectRatio[0] / projector.aspectRatio[1]);
+		const offset =
+			height * ((flipped.value ? -projector.offset : projector.offset) - 0.5);
 		const diagonal = Math.sqrt(width ** 2 + height ** 2);
 		const area = (width * height) / (100 * 100); // sqcm 2 sqm
 		return { width, height, offset, diagonal, area };
@@ -294,19 +416,14 @@
 	const shinePath = computed(() => {
 		const totalHeightInSvgSpace =
 			100 * (renderData.totalGraphicHeight / renderData.distance);
-		const lensCenter =
-			renderData.totalGraphicHeight -
-			((renderData.imageOffset < 0 ? 0 : projector.lensOffset) +
-				Math.max(-renderData.imageOffset, 0));
+		const lensCenter = renderData.lensCenter;
 		const lensUpper = lensCenter - projector.lensDiameter / 2;
 		const lensLower = lensCenter + projector.lensDiameter / 2;
 		const relativeLensUpper = lensUpper / renderData.totalGraphicHeight;
 		const relativeLensLower = lensLower / renderData.totalGraphicHeight;
 
 		const topOffsetRight =
-			(renderData.imageOffset < 0
-				? Math.max(0, renderData.totalGraphicHeight - renderData.imageHeight)
-				: 0) / renderData.totalGraphicHeight;
+			renderData.topOffsetRight / renderData.totalGraphicHeight;
 
 		return `M0 ${totalHeightInSvgSpace * relativeLensUpper}L0 ${
 			totalHeightInSvgSpace * relativeLensLower
@@ -317,11 +434,11 @@
 	});
 
 	const inputs = reactive({
-		distance: distance.value,
-		width: image.value.width,
-		height: image.value.height,
-		diagonal: image.value.diagonal,
-		offset: image.value.offset,
+		distance: distance.value * (imperial.value ? 1 / 2.54 : 1),
+		width: image.value.width * (imperial.value ? 1 / 2.54 : 1),
+		height: image.value.height * (imperial.value ? 1 / 2.54 : 1),
+		diagonal: image.value.diagonal * (imperial.value ? 1 / 2.54 : 1),
+		offset: image.value.offset * (imperial.value ? 1 / 2.54 : 1),
 		lux: projector.lumen / image.value.area,
 	});
 
@@ -332,23 +449,31 @@
 		imageOffset: image.value.offset,
 		imageWidth: image.value.width,
 		bottomOffset: bottomOffset.value,
+		topOffsetRight:
+			image.value.offset < 0
+				? Math.max(0, totalGraphicHeight.value - image.value.height)
+				: 0,
+		lensCenter:
+			totalGraphicHeight.value -
+			((image.value.offset < 0 ? 0 : projector.lensOffset) +
+				Math.max(-image.value.offset, 0)),
 	});
 
 	const updatingFromWithin = ref(false);
 
-	watch(
-		() => projector.throwRatio,
-		() => {
-			if (updatingFromWithin.value) return;
-			updateValues();
-		}
-	);
+	watch(flipped, updateValues);
+	watch(projector, updateValues);
+	watch(imperial, () => {
+		if (updatingFromWithin.value) return;
+		updateValues();
+	});
 
 	watch(
 		() => inputs.distance,
 		() => {
 			if (updatingFromWithin.value) return;
-			distance.value = Math.max(50, parseFloat(inputs.distance.toString()));
+			const inputInCm = inputs.distance * (imperial.value ? 2.54 : 1);
+			distance.value = Math.max(50, inputInCm);
 			updateValues();
 		}
 	);
@@ -356,7 +481,8 @@
 		() => inputs.width,
 		() => {
 			if (updatingFromWithin.value) return;
-			distance.value = inputs.width * projector.throwRatio;
+			const inputInCm = inputs.width * (imperial.value ? 2.54 : 1);
+			distance.value = Math.max(50, inputInCm * projector.throwRatio);
 			updateValues();
 		}
 	);
@@ -364,8 +490,13 @@
 		() => inputs.height,
 		() => {
 			if (updatingFromWithin.value) return;
-			distance.value =
-				inputs.height * projector.aspectRatio * projector.throwRatio;
+			const inputInCm = inputs.height * (imperial.value ? 2.54 : 1);
+			distance.value = Math.max(
+				50,
+				inputInCm *
+					(projector.aspectRatio[0] / projector.aspectRatio[1]) *
+					projector.throwRatio
+			);
 			updateValues();
 		}
 	);
@@ -373,10 +504,13 @@
 		() => inputs.diagonal,
 		() => {
 			if (updatingFromWithin.value) return;
+			const inputInCm = inputs.diagonal * (imperial.value ? 2.54 : 1);
 			const width =
-				(inputs.diagonal * projector.aspectRatio) /
-				Math.sqrt(projector.aspectRatio ** 2 + 1);
-			distance.value = width * projector.throwRatio;
+				(inputInCm * (projector.aspectRatio[0] / projector.aspectRatio[1])) /
+				Math.sqrt(
+					(projector.aspectRatio[0] / projector.aspectRatio[1]) ** 2 + 1
+				);
+			distance.value = Math.max(50, width * projector.throwRatio);
 			updateValues();
 		}
 	);
@@ -402,12 +536,12 @@
 	function updateValues() {
 		updatingFromWithin.value = true;
 		gsap.to(inputs, {
-			offset: image.value.offset,
+			offset: image.value.offset * (imperial.value ? 1 / 2.54 : 1),
 			lux: projector.lumen / image.value.area,
-			distance: distance.value,
-			diagonal: image.value.diagonal,
-			width: image.value.width,
-			height: image.value.height,
+			distance: distance.value * (imperial.value ? 1 / 2.54 : 1),
+			diagonal: image.value.diagonal * (imperial.value ? 1 / 2.54 : 1),
+			width: image.value.width * (imperial.value ? 1 / 2.54 : 1),
+			height: image.value.height * (imperial.value ? 1 / 2.54 : 1),
 			onComplete() {
 				updatingFromWithin.value = false;
 			},
@@ -419,13 +553,21 @@
 			imageWidth: image.value.width,
 			imageOffset: image.value.offset,
 			bottomOffset: bottomOffset.value,
+			topOffsetRight:
+				image.value.offset < 0
+					? Math.max(0, totalGraphicHeight.value - image.value.height)
+					: 0,
+			lensCenter:
+				totalGraphicHeight.value -
+				((image.value.offset < 0 ? 0 : projector.lensOffset) +
+					Math.max(-image.value.offset, 0)),
 		});
 	}
 </script>
 
 <style scoped>
 	.flicker {
-		/* animation: flicker 0.1s steps(3) infinite; */
+		animation: flicker 0.1s steps(3) infinite;
 	}
 	@keyframes flicker {
 		from {
@@ -434,5 +576,19 @@
 		to {
 			opacity: 1;
 		}
+	}
+	.fade-enter-from,
+	.fade-leave-to,
+	.fade-quick-enter-from,
+	.fade-quick-leave-to {
+		opacity: 0;
+	}
+	.fade-enter-active,
+	.fade-leave-active {
+		transition: opacity 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+	}
+	.fade-quick-enter-active,
+	.fade-quick-leave-active {
+		transition: opacity 0.25s cubic-bezier(0.65, 0, 0.35, 1);
 	}
 </style>

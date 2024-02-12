@@ -14,19 +14,24 @@
 				:value="round(<number>intermediateValue)"
 				@input="updateValue"
 				@keypress.enter="(e) => updateValue(e, true)" />
-			<p class="ml-1.5">cm</p>
+			<p class="ml-1.5">{{ imperial ? "in" : "cm" }}</p>
 		</div>
 	</label>
 </template>
 
 <script setup lang="ts">
 	import { useDebounceFn } from "@vueuse/core";
-	import { ref, watch } from "vue";
+	import { inject, ref, watch, type Ref } from "vue";
 	import { round } from "@/helpers";
 	const emit = defineEmits<{
 		"update:model-value": [value: string];
 	}>();
-	const props = defineProps<{ modelValue: string | number; label: string }>();
+	const props = defineProps<{
+		modelValue: string | number;
+		label: string;
+	}>();
+
+	const imperial = inject<Ref<boolean>>("imperial", ref(false));
 
 	const intermediateValue = ref(props.modelValue);
 
@@ -77,6 +82,24 @@
 
 	.self-scaling::after {
 		content: attr(data-value) "";
+		visibility: hidden;
+		white-space: pre-wrap;
+		box-sizing: border-box;
+	}
+
+	.self-scaling:has(input:nth-of-type(2))::before,
+	.self-scaling:has(input:nth-of-type(2)) input:nth-of-type(2) {
+		width: auto;
+		min-width: 1em;
+		grid-area: 1 / 3;
+		font: inherit;
+		resize: none;
+		background: none;
+		appearance: none;
+		height: 1em;
+	}
+	.self-scaling:has(input:nth-of-type(2))::after {
+		content: attr(data-value2) "";
 		visibility: hidden;
 		white-space: pre-wrap;
 		box-sizing: border-box;

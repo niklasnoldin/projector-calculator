@@ -3,7 +3,7 @@ interface Projector {
   lensOffset: number;
   lensDiameter: number;
   throwRatio: number;
-  aspectRatio: number;
+  aspectRatio: [number, number];
   offset: number;
   lumen: number;
   maxZoom?: number
