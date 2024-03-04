@@ -1,7 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
+@import "./toast.scss";
 html {
 	--dark: hsl(240, 49%, 38%);
 	/* --light: #eff5fd; */

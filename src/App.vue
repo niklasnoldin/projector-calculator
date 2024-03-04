@@ -5,53 +5,66 @@
 			<div
 				class="backdrop-blur text-highlight shadow-xl backdrop-brightness-50 px-xl py-6 rounded-2xl">
 				<h2 class="big mb-4 leading-none text-highlight">Projector</h2>
-				<InputHorizontal v-model="projector.throwRatio" label="Throw Ratio" />
 				<InputHorizontal
-					v-model="projector.lumen"
+					v-model.number="projector.throwRatio"
+					label="Throw Ratio" />
+				<InputHorizontal
+					v-model.number="projector.lumen"
 					label="Brightness"
 					unit="Lumen" />
-				<InputHorizontal v-model="projector.offset" label="Offset" />
+				<InputHorizontal v-model.number="projector.offset" label="Offset" />
 				<InputHorizontal
-					v-model:model-value="projector.aspectRatio[0]"
-					v-model:model-value2="projector.aspectRatio[1]"
+					v-model:model-value.number="projector.aspectRatio[0]"
+					v-model:model-value2.number="projector.aspectRatio[1]"
 					separator=":"
 					label="Aspect Ratio" />
 			</div>
 			<div class="mt-2 sm:mt-4 flex">
-				<button
-					class="px-8 py-4 grow border border-highlight font-sans font-bold whitespace-nowrap rounded-2xl text-dark bg-highlight relative shadow-xl"
-					@click="flipped = !flipped">
-					<span
-						:class="flipped && 'opacity-0'"
-						class="flex justify-center transition-opacity"
-						>mount to ceiling</span
-					>
-					<span
-						:class="flipped || 'opacity-0'"
-						class="absolute inset-0 h-full items-center flex justify-center transition-opacity"
-						>put on feet</span
-					>
-				</button>
-				<button
-					@click="imperial = false"
-					class="ml-3 sm:ml-5 inline-block transition-colors border border-highlight px-8 py-4 font-sans font-bold whitespace-nowrap rounded-l-2xl relative shadow-xl"
-					:class="
-						imperial
-							? ' backdrop-blur text-highlight'
-							: 'bg-highlight text-dark '
-					">
-					cm
-				</button>
-				<button
-					@click="imperial = true"
-					class="inline-block transition-colors px-8 py-4 border border-highlight font-sans font-bold whitespace-nowrap rounded-r-2xl relative shadow-xl"
-					:class="
-						!imperial
-							? ' backdrop-blur text-highlight'
-							: 'bg-highlight text-dark '
-					">
-					in
-				</button>
+				<div class="grow text-center flex flex-col shadow-xl rounded-2xl">
+					<button
+						class="transition-colors px-4 py-1 border border-highlight font-sans font-bold whitespace-nowrap rounded-t-2xl"
+						:class="
+							flipped
+								? 'backdrop-blur text-highlight'
+								: 'bg-highlight text-dark'
+						"
+						@click="flipped = !flipped">
+						right side up
+					</button>
+					<button
+						class="transition-colors px-4 py-1 border border-highlight font-sans font-bold whitespace-nowrap rounded-b-2xl"
+						:class="
+							!flipped
+								? 'backdrop-blur text-highlight'
+								: 'bg-highlight text-dark'
+						"
+						@click="flipped = !flipped">
+						upside down
+					</button>
+				</div>
+				<div
+					class="text-center ml-3 sm:ml-5 flex flex-col shadow-xl rounded-2xl">
+					<button
+						@click="imperial = true"
+						class="inline-block transition-colors px-4 py-1 border border-highlight font-sans font-bold whitespace-nowrap rounded-t-2xl relative"
+						:class="
+							!imperial
+								? 'backdrop-blur text-highlight'
+								: 'bg-highlight text-dark '
+						">
+						in
+					</button>
+					<button
+						@click="imperial = false"
+						class="inline-block transition-colors border border-highlight px-4 py-1 font-sans font-bold whitespace-nowrap rounded-b-2xl relative"
+						:class="
+							imperial
+								? 'backdrop-blur text-highlight'
+								: 'bg-highlight text-dark'
+						">
+						cm
+					</button>
+				</div>
 			</div>
 		</div>
 		<div
@@ -290,6 +303,7 @@
 	import Input from "@/components/Input.vue";
 	import gsap from "gsap";
 	import { formatNumber, round } from "@/helpers";
+	import { useToast } from "vue-toastification";
 
 	import {
 		breakpointsTailwind,
@@ -327,6 +341,9 @@
 	const distance = ref(100);
 	const flipped = ref(false);
 	const imperial = ref(false);
+
+	const toast = useToast();
+	toast("hi");
 
 	provide("imperial", readonly(imperial));
 
@@ -424,6 +441,7 @@
 			if (updatingFromWithin.value) return;
 			const inputInCm = inputs.distance * (imperial.value ? 2.54 : 1);
 			distance.value = Math.max(50, inputInCm);
+			if (inputInCm < 50) toast.info("Distance has to be at least 50cm.");
 			updateValues();
 		}
 	);
@@ -521,7 +539,7 @@
 	}
 	@keyframes flicker {
 		from {
-			opacity: 0.75;
+			opacity: 0.85;
 		}
 		to {
 			opacity: 1;

@@ -1,26 +1,24 @@
 <template>
 	<label :for="`input-${label}`" class="flex justify-between items-center">
-		<span>{{ label }}</span>
+		<span class="mr-8">{{ label }}</span>
 		<div
 			class="big border-b focus-within:border-current mb-1 self-scaling"
-			:data-value="round(<number>intermediateValue)"
-			:data-value2="round(<number>intermediateValue2)">
+			:data-value="intermediateValue"
+			:data-value2="intermediateValue2">
 			<input
 				class="bg-transparent text-center focus:outline-none"
-				type="string"
 				size="1"
 				:id="`input-${label}`"
-				:value="round(<number>intermediateValue)"
+				:value="intermediateValue"
 				@input="updateValue"
 				@keypress.enter="(e) => updateValue(e, true)" />
 			<p class="leading-none" v-if="separator">{{ separator }}</p>
 			<input
 				v-if="modelValue2 !== undefined"
 				class="bg-transparent text-center focus:outline-none"
-				type="string"
 				size="1"
 				:id="`input-${label}2`"
-				:value="round(<number>intermediateValue2)"
+				:value="intermediateValue2"
 				@input="updateValue2"
 				@keypress.enter="(e) => updateValue2(e, true)" />
 			<p v-if="unit" class="ml-1.5 leading-none">{{ unit }}</p>

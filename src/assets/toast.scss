@@ -1,0 +1,30 @@
+$vt-color-success: white;
+$vt-color-default: theme("colors.dark.DEFAULT");
+$vt-text-color-success: #000;
+$vt-font-family: theme("fontFamily.sans");
+$vt-color-info: transparent;
+$vt-toast-background: transparent;
+$vt-text-color-default: theme("colors.dark.DEFAULT");
+$vt-text-color-info: theme("colors.dark.DEFAULT");
+
+// Import the regular Vue Toastification stylesheets (or create your own)
+@import "vue-toastification/src/scss/_variables";
+@import "vue-toastification/src/scss/_toastContainer";
+@import "vue-toastification/src/scss/_toast";
+@import "vue-toastification/src/scss/_closeButton";
+@import "vue-toastification/src/scss/_progressBar";
+@import "vue-toastification/src/scss/_icon";
+@import "vue-toastification/src/scss/animations/_slideBlurred";
+.#{$vt-namespace}__toast {
+	// font-weight: bolder;
+	// background-color: hsl(240, 49%, 38%);
+	@apply backdrop-blur backdrop-brightness-200;
+}
+
+.#{$vt-namespace}__progress-bar {
+	background-color: currentColor;
+}
+
+.#{$vt-namespace}__close-button {
+	color: currentColor;
+}
