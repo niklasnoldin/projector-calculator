@@ -27,6 +27,10 @@ html {
 	/* filter: url(#noiseFilter); */
 }
 
+*::selection {
+	@apply bg-light text-dark;
+}
+
 .smolfat {
 	font-weight: 900;
 }
