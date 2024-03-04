@@ -32,7 +32,7 @@
 								? 'backdrop-blur text-highlight'
 								: 'bg-highlight text-dark'
 						"
-						@click="flipped = !flipped">
+						@click="flipped = false">
 						right side up
 					</button>
 					<button
@@ -42,7 +42,7 @@
 								? 'backdrop-blur text-highlight'
 								: 'bg-highlight text-dark'
 						"
-						@click="flipped = !flipped">
+						@click="flipped = true">
 						upside down
 					</button>
 				</div>
