@@ -3,7 +3,7 @@
 @tailwind utilities;
 @import "./toast.scss";
 html {
-	--dark: hsl(240, 49%, 38%);
+	--dark: #313190;
 	/* --light: #eff5fd; */
 	--light: hsl(179, 100%, 88%);
 	--screen: var(--light);

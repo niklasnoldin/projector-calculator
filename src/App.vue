@@ -2,8 +2,12 @@
 	<h1 class="sr-only">Projector Calculator</h1>
 	<main class="h-screen">
 		<div class="absolute z-10 top-xl left-xl right-xl sm:right-auto sm:w-auto">
+			<p
+				class="absolute bg-black rotate-6 bg-opacity-50 uppercase z-20 rounded-xl bg-transparent backdrop-blur px-4 py-1 right-0 top-0 font-bold font-sans translate-x-3 -translate-y-1.5 text-lime-400">
+				BETA
+			</p>
 			<div
-				class="backdrop-blur text-highlight shadow-xl backdrop-brightness-50 px-xl py-6 rounded-2xl">
+				class="backdrop-blur text-highlight shadow-xl backdrop-brightness-50 px-xl py-6 rounded-2xl relative">
 				<h2 class="big mb-4 leading-none text-highlight">Projector</h2>
 				<InputHorizontal
 					v-model.number="projector.throwRatio"
