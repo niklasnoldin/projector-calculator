@@ -98,7 +98,7 @@
 		appearance: none;
 		height: 1em;
 	}
-	.self-scaling:has(input:nth-of-type(2))::after {
+	.self-scaling:has(input:nth-of-type(2))::before {
 		content: attr(data-value2) "";
 		visibility: hidden;
 		white-space: pre-wrap;

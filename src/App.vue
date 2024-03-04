@@ -5,72 +5,21 @@
 			<div
 				class="backdrop-blur text-highlight shadow-xl backdrop-brightness-50 px-xl py-6 rounded-2xl">
 				<h2 class="big mb-4 leading-none text-highlight">Projector</h2>
-
-				<label for="throw-ratio" class="flex justify-between items-center">
-					<span class="">Throw Ratio</span>
-					<div
-						class="big border-b focus-within:border-current mb-1 self-scaling"
-						:data-value="projector.throwRatio">
-						<input
-							class="bg-transparent text-center focus:outline-none"
-							type="string"
-							size="1"
-							id="throw-ratio"
-							v-model="projector.throwRatio" />
-					</div>
-				</label>
-				<label for="brightness" class="flex justify-between items-center">
-					<span class="">Brightness</span>
-					<div
-						class="big border-b focus-within:border-current mb-1 self-scaling"
-						:data-value="projector.lumen">
-						<input
-							class="bg-transparent text-center focus:outline-none"
-							type="string"
-							size="1"
-							id="brightness"
-							v-model="projector.lumen" />
-						<p class="ml-1.5 leading-none">Lumen</p>
-					</div>
-				</label>
-				<label for="offset" class="flex justify-between items-center">
-					<span class="">Offset</span>
-					<div
-						class="big border-b focus-within:border-current mb-1 self-scaling"
-						:data-value="projector.offset">
-						<input
-							class="bg-transparent text-center focus:outline-none"
-							type="string"
-							size="1"
-							id="offset"
-							v-model="projector.offset" />
-					</div>
-				</label>
-				<label for="aspectRatio-1" class="flex justify-between items-center">
-					<span class="">Aspect Ratio</span>
-					<div
-						class="big border-b focus-within:border-current mb-1 self-scaling"
-						:data-value="projector.aspectRatio[0]"
-						:data-value2="projector.aspectRatio[1]">
-						<input
-							class="bg-transparent text-center focus:outline-none"
-							type="string"
-							size="1"
-							id="aspectRatio-1"
-							v-model="projector.aspectRatio[0]" />
-						<p class="leading-none">:</p>
-						<input
-							class="bg-transparent text-center focus:outline-none"
-							type="string"
-							size="1"
-							id="aspectRatio-2"
-							v-model="projector.aspectRatio[1]" />
-					</div>
-				</label>
+				<InputHorizontal v-model="projector.throwRatio" label="Throw Ratio" />
+				<InputHorizontal
+					v-model="projector.lumen"
+					label="Brightness"
+					unit="Lumen" />
+				<InputHorizontal v-model="projector.offset" label="Offset" />
+				<InputHorizontal
+					v-model:model-value="projector.aspectRatio[0]"
+					v-model:model-value2="projector.aspectRatio[1]"
+					separator=":"
+					label="Aspect Ratio" />
 			</div>
 			<div class="mt-2 sm:mt-4 flex">
 				<button
-					class="px-8 py-4 grow border border-highlight font-sans font-bold whitespace-nowrap rounded-2xl text-dark bg-highlight relative"
+					class="px-8 py-4 grow border border-highlight font-sans font-bold whitespace-nowrap rounded-2xl text-dark bg-highlight relative shadow-xl"
 					@click="flipped = !flipped">
 					<span
 						:class="flipped && 'opacity-0'"
@@ -347,6 +296,7 @@
 		useBreakpoints,
 		useWindowSize,
 	} from "@vueuse/core";
+	import InputHorizontal from "./components/InputHorizontal.vue";
 	const { width, height } = useWindowSize();
 	const { md } = useBreakpoints(breakpointsTailwind);
 	const windowAspectRatio = computed(() =>
